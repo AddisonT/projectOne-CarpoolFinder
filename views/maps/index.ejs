@@ -46,8 +46,8 @@
 	var geocoder = L.mapbox.geocoder('mapbox.places')
 	var myLayer = L.mapbox.featureLayer().addTo(map);
 	
-	geocoder.query('<%= street.home  %>', showMap);
-	geocoder.query('<%= street.work  %>', showMapTwo);
+	geocoder.query('<%= home  %>', showMap);
+	geocoder.query('<%= work  %>', showMapTwo);
 
 	function showMap(err, data) {
     // The geocoder can return an area, like a city, or a

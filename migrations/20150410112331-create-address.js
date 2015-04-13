@@ -23,7 +23,7 @@ module.exports = {
       zip: {
         type: DataTypes.INTEGER
       },
-      userID: {
+      UserId: {
         type: DataTypes.INTEGER
       },
       createdAt: {
