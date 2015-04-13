@@ -11,7 +11,7 @@ module.exports = function (sequelize, DataTypes){
 				len: [6, 30],
 			}
 		},
-		passwordDigest: {
+		password: {
 			type:DataTypes.STRING,
 			validate: {
 				notEmpty: true
@@ -21,29 +21,29 @@ module.exports = function (sequelize, DataTypes){
 
 	{
 		instanceMethods: {
-			checkPassword: function(password) {
-				return bcrypt.compareSync(password, this.passwordDigest);
+			checkPassword: function(passwordD) {
+				return bcrypt.compareSync(passwordD, this.password);
 			}
 		},
 		classMethods: {
 			associate: function(models){
 				this.hasMany(models.Address);
 			},
-			encryptPassword: function(password) {
-				var hash = bcrypt.hashSync(password, salt);
+			encryptPassword: function(passwordD) {
+				var hash = bcrypt.hashSync(passwordD, salt);
 				return hash;
 			},
-			createSecure: function(email, password) {
-				if(password.length < 6) {
+			createSecure: function(email, passwordD) {
+				if(passwordD.length < 6) {
 					throw new Error("Password too short");
 				}
 				return this.create({
 					email: email,
-					passwordDigest: this.encryptPassword(password)
+					password: this.encryptPassword(passwordD)
 				});
 
 			},
-			authenticate: function(email, password) {
+			authenticate: function(email, passwordD) {
 				// find a user in the DB
 				return this.find({
 					where: {
@@ -54,7 +54,7 @@ module.exports = function (sequelize, DataTypes){
 					if (user === null){
 						throw new Error("Username does not exist");
 					}
-					 else if (user.checkPassword(password) === true){
+					 else if (user.checkPassword(passwordD) === true){
 						return user;
 					}
 				});

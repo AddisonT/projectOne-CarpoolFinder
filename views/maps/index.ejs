@@ -27,7 +27,7 @@
 				<div id='map' style="height:400px;"></div>
 			</div>
 			<div class="col-md-4 col-xs-4 col-sm-4 col-lg-4">
-				<h1>People in Neighborhood</h1>
+				<h1>People in Your Neighborhood</h1>
 			</div>
 		</div>
 		<div class="row" >
@@ -44,6 +44,7 @@
 	var map2 = L.mapbox.map('map2', 'examples.map-i86nkdio')
 	.setView([40, -74.50], 9);
 	var geocoder = L.mapbox.geocoder('mapbox.places')
+	var myLayer = L.mapbox.featureLayer().addTo(map);
 	
 	geocoder.query('<%= street.home  %>', showMap);
 	geocoder.query('<%= street.work  %>', showMapTwo);
@@ -57,7 +58,15 @@
    		} else if (data.latlng) {
     		map.setView([data.latlng[0], data.latlng[1]], 13);
  	    }
-	}
+ 	    L.marker([data.latlng[0],data.latlng[1]],{
+			icon: L.mapbox.marker.icon({
+				'title': "Home",
+        		'marker-size': 'large',
+        		'marker-symbol': 'building',
+        		'marker-color': '#000'
+    		})
+		}).addTo(map);
+	};
 
 	function showMapTwo(err, data) {
     // The geocoder can return an area, like a city, or a
@@ -68,7 +77,44 @@
    		} else if (data.latlng) {
     		map2.setView([data.latlng[0], data.latlng[1]], 13);
  	    }
-	}
+ 	    L.marker([data.latlng[0],data.latlng[1]],{
+			icon: L.mapbox.marker.icon({
+				'title': "Work",
+        		'marker-size': 'large',
+        		'marker-symbol': 'suitcase',
+        		'marker-color': '#000'
+    		})
+		}).addTo(map2);
+	};
+
+var geoJson = [{
+    "type": "Feature",
+    "geometry": {
+        "type": "Point",
+        "coordinates": [-75.00, 40]
+    },
+    "properties": {
+        "title": "Small astronaut",
+        "icon": L.mapbox.marker.icon({
+        'marker-size': 'large',
+        'marker-symbol': 'bike',
+        'marker-color': '#fa0'
+    })
+    }
+}];
+
+// Set a custom icon on each marker based on feature properties.
+myLayer.on('layeradd', function(e) {
+    var marker = e.layer,
+        feature = marker.feature;
+
+    marker.setIcon(L.icon(feature.properties.icon));
+});
+
+// Add features to the map.
+myLayer.setGeoJSON(geoJson);
+
+
 	</script>
 </body>
 </html>

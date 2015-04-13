@@ -63,7 +63,7 @@ app.post('/login', function(req,res){
 	db.User.authenticate(req.body.email, req.body.password).
 	then(function(user){
 		req.login(user);
-		res.redirect('users/profile');
+		res.redirect('/profile');
 	});
 });
 
@@ -73,7 +73,7 @@ app.post('/signup', function(req,res){
 
 	db.User.createSecure(email,password).
 	then(function(user){
-		res.redirect("/profile");
+		res.redirect("/login");
 	});
 });
 
@@ -84,10 +84,37 @@ app.delete('/logout', function(req,res){
 app.get('/profile', function(req,res){
 	req.currentUser().then(function(dbUser){
 		if (dbUser) {
-			res.render('users/profile', {ejsUser: dbUser});
+			db.Address.findAll({where: {UserId: dbUser.id}})
+			.then(function(addresses){
+				res.render('users/profile',{user: dbUser, addresses: addresses});
+			});
 		} else {
 			res.redirect('users/login');
 		}
+	});
+});
+
+app.get('/profile/edit', function(req,res){
+	req.currentUser().then(function(user){
+		db.Address.findAll({where: {UserId: user.id}})
+		.then(function(addresses){
+			res.render('users/edit',{user: user, addresses: addresses});
+		});
+	});
+});
+
+app.post('/profile', function(req,res){
+	req.currentUser().then(function(user){
+		var userId = user.id;
+
+		db.Address.create({type: "home", address: req.body.addressH
+			, name: req.body.nameH, userID: userId, city: req.body.cityH
+			, state: req.body.stateH, zip: req.body.zipH});
+
+		db.Address.create({type: "work", address: req.body.addressW
+			, name: req.body.nameW, userID: userId, city: req.body.cityW
+			, state: req.body.stateW, zip: req.body.zipW});
+		res.redirect('/profile');
 	});
 });
 
