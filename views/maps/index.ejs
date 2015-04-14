@@ -47,9 +47,10 @@
 	.setView([40, -74.50], 9);
 	var geocoder = L.mapbox.geocoder('mapbox.places')
 	var myLayer = L.mapbox.featureLayer().addTo(map);
+	var myLayer2 = L.mapbox.featureLayer().addTo(map2);
 	
-	geocoder.query('<%= homeAdd  %>', showMap);
-	geocoder.query('<%= workAdd  %>', showMapTwo);
+	geocoder.query('<%= home.fullAdd  %>', showMap);
+	geocoder.query('<%= work.fullAdd  %>', showMapTwo);
 	// geocoder.query(homeAdd, showMap);
 	// geocoder.query(workAdd, showMapTwo);
 
@@ -62,13 +63,27 @@
    		} else if (data.latlng) {
     		map.setView([data.latlng[0], data.latlng[1]], 13);
  	    }
- 	    L.marker([data.latlng[0],data.latlng[1]],{
-			icon: L.mapbox.marker.icon({
-				'title': "Home",
-        		'marker-size': 'large',
-        		'marker-symbol': 'building',
-        		'marker-color': '#000'
-    		})
+		L.mapbox.featureLayer({
+		    // this feature is in the GeoJSON format: see geojson.org
+		    // for the full specification
+		    type: 'Feature',
+		    geometry: {
+		        type: 'Point',
+		        // coordinates here are in longitude, latitude order because
+		        // x, y is the standard for GeoJSON and many formats
+		        coordinates: [
+		          data.latlng[1], data.latlng[0] 
+		        ]
+		    },
+		    properties: {
+		        title: '<%= home.name  %>',
+		        description: 'Home location of <%= home.name %>',
+		        // one can customize markers by adding simplestyle properties
+		        // https://www.mapbox.com/guides/an-open-platform/#simplestyle
+		        'marker-size': 'large',
+		        'marker-color': '#000',
+		        'marker-symbol': 'building'
+		    }
 		}).addTo(map);
 	};
 
@@ -81,43 +96,30 @@
    		} else if (data.latlng) {
     		map2.setView([data.latlng[0], data.latlng[1]], 13);
  	    }
- 	    L.marker([data.latlng[0],data.latlng[1]],{
-			icon: L.mapbox.marker.icon({
-				'title': "Work",
-        		'marker-size': 'large',
-        		'marker-symbol': 'suitcase',
-        		'marker-color': '#000'
-    		})
+
+		L.mapbox.featureLayer({
+		    // this feature is in the GeoJSON format: see geojson.org
+		    // for the full specification
+		    type: 'Feature',
+		    geometry: {
+		        type: 'Point',
+		        // coordinates here are in longitude, latitude order because
+		        // x, y is the standard for GeoJSON and many formats
+		        coordinates: [
+		          data.latlng[1], data.latlng[0] 
+		        ]
+		    },
+		    properties: {
+		        title: '<%= work.name  %>',
+		        description: 'Work place of <%= home.name %>',
+		        // one can customize markers by adding simplestyle properties
+		        // https://www.mapbox.com/guides/an-open-platform/#simplestyle
+		        'marker-size': 'large',
+		        'marker-color': '#000',
+		        'marker-symbol': 'suitcase'
+		    }
 		}).addTo(map2);
 	};
-
-var geoJson = [{
-    "type": "Feature",
-    "geometry": {
-        "type": "Point",
-        "coordinates": [-75.00, 40]
-    },
-    "properties": {
-        "title": "Small astronaut",
-        "icon": L.mapbox.marker.icon({
-        'marker-size': 'large',
-        'marker-symbol': 'bike',
-        'marker-color': '#fa0'
-    })
-    }
-}];
-
-// Set a custom icon on each marker based on feature properties.
-myLayer.on('layeradd', function(e) {
-    var marker = e.layer,
-        feature = marker.feature;
-
-    marker.setIcon(L.icon(feature.properties.icon));
-});
-
-// Add features to the map.
-myLayer.setGeoJSON(geoJson);
-
 
 	</script>
 </body>

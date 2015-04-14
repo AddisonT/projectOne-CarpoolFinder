@@ -155,9 +155,7 @@ app.get('/map', function(req,res){
 	req.currentUser().then(function(user){
 		db.Address.findAll({where: {UserId: user.id}})
 		.then(function(addresses){
-				var homeAdd = "" +  addresses[0].address + ", " +  addresses[0].city + " " +  addresses[0].state  + " " +  addresses[0].zip ;
-				var workAdd = "" +  addresses[1].address + ", " +  addresses[1].city + " " +  addresses[1].state  + " " + addresses[1].zip ;
-			res.render('maps',{home: addresses[0], work: addresses[1], homeAdd: homeAdd, workAdd: workAdd});
+			res.render('maps',{home: addresses[0], work: addresses[1]});
 		});
 	});
 });
