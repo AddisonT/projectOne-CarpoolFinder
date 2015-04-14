@@ -3,8 +3,8 @@
 module.exports = {
   up: function(migration, DataTypes, done) {
     // add altering commands here, calling 'done' when finished
-    migration.renameColumn("Addresses", "userID", "UserId");
-    done();
+    migration.addColumn("Addresses","fullAdd",DataTypes.STRING);
+	done();
   },
 
   down: function(migration, DataTypes, done) {

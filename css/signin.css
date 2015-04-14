@@ -4,7 +4,7 @@ body {
   background-color: #eee;
 }
 
-h1{
+h2{
   text-align: center;
 }
 .form-signin {
@@ -40,4 +40,7 @@ h1{
   margin-bottom: 10px;
   border-top-left-radius: 0;
   border-top-right-radius: 0;
+}
+.maps {
+  margin: ;
 }

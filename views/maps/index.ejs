@@ -22,16 +22,18 @@
 </head>
 <body>
 	<div class="container">
-		<div class="row" >
+		<div class="row maps" >
 			<div class="col-md-8 col-xs-8 col-sm-8 col-lg-8">
+				<h1>Home Location</h1>
 				<div id='map' style="height:400px;"></div>
 			</div>
 			<div class="col-md-4 col-xs-4 col-sm-4 col-lg-4">
 				<h1>People in Your Neighborhood</h1>
 			</div>
-		</div>
-		<div class="row" >
+		</div></br>
+		<div class="row maps" >
 			<div class="col-md-8 col-xs-8 col-sm-8 col-lg-8">
+				<h1>Work Location</h1>
 				<div id='map2' style="height:400px;"></div>
 			</div>
 			<div class="col-md-4 col-xs-4 col-sm-4 col-lg-4"></div>
@@ -46,8 +48,10 @@
 	var geocoder = L.mapbox.geocoder('mapbox.places')
 	var myLayer = L.mapbox.featureLayer().addTo(map);
 	
-	geocoder.query('<%= home  %>', showMap);
-	geocoder.query('<%= work  %>', showMapTwo);
+	geocoder.query('<%= homeAdd  %>', showMap);
+	geocoder.query('<%= workAdd  %>', showMapTwo);
+	// geocoder.query(homeAdd, showMap);
+	// geocoder.query(workAdd, showMapTwo);
 
 	function showMap(err, data) {
     // The geocoder can return an area, like a city, or a

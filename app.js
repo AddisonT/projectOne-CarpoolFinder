@@ -75,13 +75,19 @@ app.post('/signup', function(req,res){
 
 	db.User.createSecure(email,password).
 	then(function(user){
+		var homeAdd = "" +  req.body.addressH + ", "
+			+  req.body.cityH + " " +  req.body.stateH
+			+ " " +  req.body.zipH;
 		db.Address.create({type: "home", address: req.body.addressH
 			, name: req.body.nameH, UserId: user.id, city: req.body.cityH
-			, state: req.body.stateH, zip: req.body.zipH})
+			, state: req.body.stateH, zip: req.body.zipH, fullAdd: homeAdd})
 	  	  .then(function(){
+	  	  	var workAdd = "" +  req.body.addressW + ", "
+				+  req.body.cityW + " " +  req.body.stateW
+				+ " " +  req.body.zipW;
 			db.Address.create({type: "work", address: req.body.addressW
 				, name: req.body.nameW, UserId: user.id, city: req.body.cityW
-				, state: req.body.stateW, zip: req.body.zipW})
+				, state: req.body.stateW, zip: req.body.zipW, fullAdd: workAdd})
 			  .then(function(){
 				res.redirect('/login');
 			  });
@@ -114,25 +120,6 @@ app.get('/profile/edit', function(req,res){
 	});
 });
 
-//creates user's addresses into the database
-// app.post('/profile', function(req,res){
-// 	req.currentUser().then(function(user){
-// 		var userId = user.id;
-
-// 		db.Address.create({type: "home", address: req.body.addressH
-// 			, name: req.body.nameH, UserId: userId, city: req.body.cityH
-// 			, state: req.body.stateH, zip: req.body.zipH})
-// 	  	  .then(function(){
-// 			db.Address.create({type: "work", address: req.body.addressW
-// 				, name: req.body.nameW, UserId: userId, city: req.body.cityW
-// 				, state: req.body.stateW, zip: req.body.zipW})
-// 			  .then(function(){
-// 				res.redirect('/profile');
-// 			  });
-// 		  });
-// 	  });
-// });
-
 //edits the existing addresses of a user in the database
 app.post('/profile/edit', function(req, res){
 	req.currentUser().then(function(user){
@@ -140,15 +127,21 @@ app.post('/profile/edit', function(req, res){
 
 		db.Address.findAll({where: {UserId: user.id}})
 		.then(function(addresses){
+			var homeAdd = "" +  req.body.addressH + ", "
+				+  req.body.cityH + " " +  req.body.stateH
+				+ " " +  req.body.zipH;
 			addresses[0].updateAttributes({
 				type: "home", address: req.body.addressH
 				, name: req.body.nameH, UserId: userId, city: req.body.cityH
-				, state: req.body.stateH, zip: req.body.zipH
-			}).then(function(){		
+				, state: req.body.stateH, zip: req.body.zipH, fullAdd: homeAdd
+			}).then(function(){
+				var workAdd = "" +  req.body.addressW + ", "
+					+  req.body.cityW + " " +  req.body.stateW
+					+ " " +  req.body.zipW;	
 				addresses[1].updateAttributes({
 					type: "work", address: req.body.addressW
 					, name: req.body.nameW, UserId: userId, city: req.body.cityW
-					, state: req.body.stateW, zip: req.body.zipW
+					, state: req.body.stateW, zip: req.body.zipW, fullAdd: workAdd
 				}).then(function(){
 					res.redirect('/profile');
 				});
@@ -159,11 +152,12 @@ app.post('/profile/edit', function(req, res){
 
 //renders the map with location information
 app.get('/map', function(req,res){
-	var location = {home:"Belmont, CA", work: "225 Bush St., San Francisco, CA"};
 	req.currentUser().then(function(user){
 		db.Address.findAll({where: {UserId: user.id}})
 		.then(function(addresses){
-			res.render('maps',{home: addresses[0], work: addresses[1]});
+				var homeAdd = "" +  addresses[0].address + ", " +  addresses[0].city + " " +  addresses[0].state  + " " +  addresses[0].zip ;
+				var workAdd = "" +  addresses[1].address + ", " +  addresses[1].city + " " +  addresses[1].state  + " " + addresses[1].zip ;
+			res.render('maps',{home: addresses[0], work: addresses[1], homeAdd: homeAdd, workAdd: workAdd});
 		});
 	});
 });

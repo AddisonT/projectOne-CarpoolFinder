@@ -7,7 +7,8 @@ module.exports = function(sequelize, DataTypes) {
     state: DataTypes.STRING,
     zip: DataTypes.INTEGER,
     UserId: DataTypes.INTEGER,
-    name: DataTypes.STRING
+    name: DataTypes.STRING,
+    fullAdd: DataTypes.STRING
   }, {
     classMethods: {
       associate: function(models) {
