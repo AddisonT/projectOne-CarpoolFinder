@@ -26,6 +26,18 @@ module.exports = {
       UserId: {
         type: DataTypes.INTEGER
       },
+      name: {
+        type: DataTypes.STRING
+      },
+      fullAdd: {
+        type: DataTypes.STRING
+      },
+      lat: {
+        type: DataTypes.FLOAT
+      },
+      lng: {
+        type: DataTypes.FLOAT
+      },
       createdAt: {
         allowNull: false,
         type: DataTypes.DATE

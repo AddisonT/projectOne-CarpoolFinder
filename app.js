@@ -6,6 +6,12 @@ var express = require('express'),
 	pg = require("pg"),
 	app = express();
 
+//mapbox api key
+var env = process.env;
+var api_key = env.MAP_BOX_KEY;
+var async = require('async');
+var request = require('request');
+
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
 
@@ -75,23 +81,64 @@ app.post('/signup', function(req,res){
 
 	db.User.createSecure(email,password).
 	then(function(user){
-		var homeAdd = "" +  req.body.addressH + ", "
-			+  req.body.cityH + " " +  req.body.stateH
-			+ " " +  req.body.zipH;
-		db.Address.create({type: "home", address: req.body.addressH
-			, name: req.body.nameH, UserId: user.id, city: req.body.cityH
-			, state: req.body.stateH, zip: req.body.zipH, fullAdd: homeAdd})
-	  	  .then(function(){
-	  	  	var workAdd = "" +  req.body.addressW + ", "
+
+
+		var workAdd = "" +  req.body.addressW + ", "
+		+  req.body.cityW + " " +  req.body.stateW
+		+ " " +  req.body.zipW;
+		var url = "https://maps.googleapis.com/maps/api/geocode/json?address=";
+
+		var fn1 = function(cb) {
+			var homeAdd = "" +  req.body.addressH + ", "
+				+  req.body.cityH + " " +  req.body.stateH
+				+ " " +  req.body.zipH;
+			var homeURL = homeAdd.replace(/\s/g,"");
+			var url = "https://maps.googleapis.com/maps/api/geocode/json?address="+homeURL;
+
+			request(url,function(err, resp, bdy){
+				if(!err && resp.statusCode === 200){
+					var body = JSON.parse(bdy);
+					var log = body.results[0].geometry.location.lng;
+					var lat = body.results[0].geometry.location.lat;
+					db.Address.create({type: "home", address: req.body.addressH
+					, name: req.body.nameH, UserId: user.id, city: req.body.cityH
+					, state: req.body.stateH, zip: req.body.zipH, fullAdd: homeAdd, lat: lat, lng: log})
+					  .then(function(){
+					  	cb(null, 'done');
+					  });
+				}
+			});
+		};
+
+		var fn2 = function(cb) {
+			var workAdd = "" +  req.body.addressW + ", "
 				+  req.body.cityW + " " +  req.body.stateW
 				+ " " +  req.body.zipW;
-			db.Address.create({type: "work", address: req.body.addressW
-				, name: req.body.nameW, UserId: user.id, city: req.body.cityW
-				, state: req.body.stateW, zip: req.body.zipW, fullAdd: workAdd})
-			  .then(function(){
+			var workURL = workAdd.replace(/\s/g,"");
+			var url = "https://maps.googleapis.com/maps/api/geocode/json?address="+workURL;
+
+			request(url, function(err, resp, bdy){
+				if(!err && resp.statusCode === 200){
+					var body = JSON.parse(bdy);
+					console.log(body);
+					var log = body.results[0].geometry.location.lng;
+					var lat = body.results[0].geometry.location.lat;
+
+					db.Address.create({type: "work", address: req.body.addressW
+					, name: req.body.nameW, UserId: user.id, city: req.body.cityW
+					, state: req.body.stateW, zip: req.body.zipW, fullAdd: workAdd, lat: lat, lng: log})
+					  .then(function(){
+				  		cb(null, 'done');
+				      });
+				}
+			});
+		};
+
+		request(url,function(err,resp,body){
+			async.parallel([fn1,fn2], function(err,results){
 				res.redirect('/login');
-			  });
-		  });
+			});
+		});
 	});
 });
 
@@ -127,24 +174,55 @@ app.post('/profile/edit', function(req, res){
 
 		db.Address.findAll({where: {UserId: user.id}})
 		.then(function(addresses){
-			var homeAdd = "" +  req.body.addressH + ", "
-				+  req.body.cityH + " " +  req.body.stateH
-				+ " " +  req.body.zipH;
-			addresses[0].updateAttributes({
-				type: "home", address: req.body.addressH
-				, name: req.body.nameH, UserId: userId, city: req.body.cityH
-				, state: req.body.stateH, zip: req.body.zipH, fullAdd: homeAdd
-			}).then(function(){
+
+			var fn1 = function(cb){
+				var homeAdd = "" +  req.body.addressH + ", "
+					+  req.body.cityH + " " +  req.body.stateH
+					+ " " +  req.body.zipH;
+				var homeURL = homeAdd.replace(/\s/g,"");
+				var url = "https://maps.googleapis.com/maps/api/geocode/json?address="+homeURL;
+
+				request(url,function(err, resp, bdy){
+					if(!err && resp.statusCode === 200){
+						var body = JSON.parse(bdy);
+						var log = body.results[0].geometry.location.lng;
+						var lat = body.results[0].geometry.location.lat;
+
+						addresses[0].updateAttributes({
+							type: "home", address: req.body.addressH
+							, name: req.body.nameH, UserId: userId, city: req.body.cityH
+							, state: req.body.stateH, zip: req.body.zipH, fullAdd: homeAdd, lat: lat, lng: log})
+							.then(function(){
+								cb(null,'done');
+							});
+					}
+				});
+			};
+
+			var fn2 = function(cb){
 				var workAdd = "" +  req.body.addressW + ", "
 					+  req.body.cityW + " " +  req.body.stateW
-					+ " " +  req.body.zipW;	
-				addresses[1].updateAttributes({
-					type: "work", address: req.body.addressW
-					, name: req.body.nameW, UserId: userId, city: req.body.cityW
-					, state: req.body.stateW, zip: req.body.zipW, fullAdd: workAdd
-				}).then(function(){
-					res.redirect('/profile');
+					+ " " +  req.body.zipW;
+				var workURL = workAdd.replace(/\s/g,"");
+				var url = "https://maps.googleapis.com/maps/api/geocode/json?address="+workURL;	
+				request(url, function(err, resp, bdy){
+					if(!err && resp.statusCode === 200){
+						var body = JSON.parse(bdy);
+						var log = body.results[0].geometry.location.lng;
+						var lat = body.results[0].geometry.location.lat;
+						addresses[1].updateAttributes({
+							type: "work", address: req.body.addressW
+							, name: req.body.nameW, UserId: userId, city: req.body.cityW
+							, state: req.body.stateW, zip: req.body.zipW, fullAdd: workAdd, lat: lat, lng: log})
+							.then(function(){
+								cb(null,'done');
+							})
+					}
 				});
+			}
+
+			async.parallel([fn1,fn2], function(err,results){
+				res.redirect('/profile');
 			});
 		});
 	});
@@ -155,7 +233,20 @@ app.get('/map', function(req,res){
 	req.currentUser().then(function(user){
 		db.Address.findAll({where: {UserId: user.id}})
 		.then(function(addresses){
-			res.render('maps',{home: addresses[0], work: addresses[1]});
+			var latUH = addresses[0].lat+0.01;
+			var latLH = addresses[0].lat-0.01;
+			var latUH = addresses[0].lng+0.01;
+			var latUH = addresses[0].lng+0.01;
+
+			var latPW = addresses[1].lat+0.01;
+			var latPW = addresses[1].lat+0.01;
+			var latPW = addresses[1].lat+0.01;
+			var latPW = addresses[1].lat+0.01;
+
+			sequelize.query("SELECT * FROM Addresses WHERE ").spread(function(results, metadata){
+
+			})
+			res.render('maps',{home: addresses[0], work: addresses[1], key: api_key});
 		});
 	});
 });

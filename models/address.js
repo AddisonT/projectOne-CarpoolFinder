@@ -8,7 +8,9 @@ module.exports = function(sequelize, DataTypes) {
     zip: DataTypes.INTEGER,
     UserId: DataTypes.INTEGER,
     name: DataTypes.STRING,
-    fullAdd: DataTypes.STRING
+    fullAdd: DataTypes.STRING,
+    lat: DataTypes.FLOAT,
+    lng: DataTypes.FLOAT
   }, {
     classMethods: {
       associate: function(models) {
