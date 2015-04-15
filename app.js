@@ -82,19 +82,13 @@ app.post('/signup', function(req,res){
 	db.User.createSecure(email,password).
 	then(function(user){
 
-
-		var workAdd = "" +  req.body.addressW + ", "
-		+  req.body.cityW + " " +  req.body.stateW
-		+ " " +  req.body.zipW;
-		var url = "https://maps.googleapis.com/maps/api/geocode/json?address=";
-
 		var fn1 = function(cb) {
 			var homeAdd = "" +  req.body.addressH + ", "
-				+  req.body.cityH + " " +  req.body.stateH
+				+  req.body.cityH + ", " +  req.body.stateH
 				+ " " +  req.body.zipH;
 			var homeURL = homeAdd.replace(/\s/g,"");
 			var url = "https://maps.googleapis.com/maps/api/geocode/json?address="+homeURL;
-
+			console.log(homeURL);
 			request(url,function(err, resp, bdy){
 				if(!err && resp.statusCode === 200){
 					var body = JSON.parse(bdy);
@@ -113,7 +107,7 @@ app.post('/signup', function(req,res){
 
 		var fn2 = function(cb) {
 			var workAdd = "" +  req.body.addressW + ", "
-				+  req.body.cityW + " " +  req.body.stateW
+				+  req.body.cityW + ", " +  req.body.stateW
 				+ " " +  req.body.zipW;
 			var workURL = workAdd.replace(/\s/g,"");
 			var url = "https://maps.googleapis.com/maps/api/geocode/json?address="+workURL;
@@ -135,10 +129,8 @@ app.post('/signup', function(req,res){
 			});
 		};
 
-		request(url,function(err,resp,body){
-			async.parallel([fn1,fn2], function(err,results){
-				res.redirect('/login');
-			});
+		async.parallel([fn1,fn2], function(err,results){
+			res.redirect('/login');
 		});
 	});
 });
@@ -186,7 +178,7 @@ app.post('/profile/edit', function(req, res){
 
 			var fn1 = function(cb){
 				var homeAdd = "" +  req.body.addressH + ", "
-					+  req.body.cityH + " " +  req.body.stateH
+					+  req.body.cityH + ", " +  req.body.stateH
 					+ " " +  req.body.zipH;
 				var homeURL = homeAdd.replace(/\s/g,"");
 				var url = "https://maps.googleapis.com/maps/api/geocode/json?address="+homeURL;
@@ -210,7 +202,7 @@ app.post('/profile/edit', function(req, res){
 
 			var fn2 = function(cb){
 				var workAdd = "" +  req.body.addressW + ", "
-					+  req.body.cityW + " " +  req.body.stateW
+					+  req.body.cityW + ", " +  req.body.stateW
 					+ " " +  req.body.zipW;
 				var workURL = workAdd.replace(/\s/g,"");
 				var url = "https://maps.googleapis.com/maps/api/geocode/json?address="+workURL;	
@@ -289,7 +281,8 @@ app.get('/map', function(req,res){
 							}
 						}
 						console.log("I'm here");
-						res.render('maps',{home: addresses[isHome], work: addresses[isWork], key: api_key, homeL: homeList, workL: workList});
+						res.render('maps',{home: addresses[isHome], work: addresses[isWork]
+							, key: api_key, homeL: homeList, workL: workList});
 					});				
 			});
 		});
@@ -300,6 +293,6 @@ app.delete('/logout', function(req,res){
     res.send("I'm a delete");
 });
 
-app.listen(3000, function(){
+app.listen(process.env.PORT || 3000, function(){
 	console.log("I'm listening");
 });

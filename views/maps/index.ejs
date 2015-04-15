@@ -30,7 +30,7 @@
 			<div class="col-md-4 col-xs-4 col-sm-4 col-lg-4">
 				<h1>People in Your Neighborhood</h1>
 				<ul style="list-style: none;">
-					<li>key: <%= key %> <%= home.fullAdd  %></li>
+					<li><%= home.fullAdd  %></li>
 				</ul>
 			</div>
 		</div></br>
@@ -45,24 +45,11 @@
 	<script>
 	L.mapbox.accessToken = '<%= key %>';
 	var map = L.mapbox.map('map', 'examples.map-i86nkdio')
-	.setView([40, -74.50], 9);
+	.setView([<%= home.lat %>, <%= home.lng %>], 13);
 	var map2 = L.mapbox.map('map2', 'examples.map-i86nkdio')
-	.setView([40, -74.50], 9);
-	var geocoder = L.mapbox.geocoder('mapbox.places');
-	
-	geocoder.query('<%= home.fullAdd  %>', showMap);
-	geocoder.query('<%= work.fullAdd  %>', showMapTwo);
-
-	function showMap(err, data) {
-    // The geocoder can return an area, like a city, or a
-    // point, like an address. Here we handle both cases,
-    // by fitting the map bounds to an area or zooming to a point.
-    	if (data.lbounds) {
-    		map.fitBounds(data.lbounds);
-   		} else if (data.latlng) {
-    		map.setView([data.latlng[0], data.latlng[1]], 13);
- 	    }
-		L.mapbox.featureLayer({
+	.setView([<%= work.lat %>, <%= work.lng %>], 13);
+	var features = [];
+	features.push({
 		    // this feature is in the GeoJSON format: see geojson.org
 		    // for the full specification
 		    type: 'Feature',
@@ -71,7 +58,7 @@
 		        // coordinates here are in longitude, latitude order because
 		        // x, y is the standard for GeoJSON and many formats
 		        coordinates: [
-		          data.latlng[1], data.latlng[0] 
+		          <%= home.lng %>, <%= home.lat %>
 		        ]
 		    },
 		    properties: {
@@ -83,20 +70,50 @@
 		        'marker-color': '#000',
 		        'marker-symbol': 'building'
 		    }
-		}).addTo(map);
-	};
+		});
 
-	function showMapTwo(err, data) {
-    // The geocoder can return an area, like a city, or a
-    // point, like an address. Here we handle both cases,
-    // by fitting the map bounds to an area or zooming to a point.
-    	if (data.lbounds) {
-    		map2.fitBounds(data.lbounds);
-   		} else if (data.latlng) {
-    		map2.setView([data.latlng[0], data.latlng[1]], 13);
- 	    }
+	console.log(<%= homeL  %>);
+	<% for(var i = 0; i< homeL.length ;i++){ %>
+		features.push({
+	        type: 'Feature',
+	        geometry: {
+	            type: 'Point',
+	            coordinates: [<%= homeL[i].lng %>, <%= homeL[i].lat %>]
+	        },
+	        properties: {
+	            'marker-color': '#000',
+	            'marker-symbol': 'star-stroked',
+	            title: '<%= homeL[i].name %>',
+	            description: 'Home of <%= homeL[i].name %>'
+	        }
+	    });
+	<%}%>
+	console.log(features);
+	L.mapbox.featureLayer(features).addTo(map);
+	// var myMapOne = L.mapbox.featureLayer({
+	// 	    // this feature is in the GeoJSON format: see geojson.org
+	// 	    // for the full specification
+	// 	    type: 'Feature',
+	// 	    geometry: {
+	// 	        type: 'Point',
+	// 	        // coordinates here are in longitude, latitude order because
+	// 	        // x, y is the standard for GeoJSON and many formats
+	// 	        coordinates: [
+	// 	          <%= home.lng %>, <%= home.lat %>
+	// 	        ]
+	// 	    },
+	// 	    properties: {
+	// 	        title: '<%= home.name  %>',
+	// 	        description: 'Home location of <%= home.name %>',
+	// 	        // one can customize markers by adding simplestyle properties
+	// 	        // https://www.mapbox.com/guides/an-open-platform/#simplestyle
+	// 	        'marker-size': 'large',
+	// 	        'marker-color': '#000',
+	// 	        'marker-symbol': 'building'
+	// 	    }
+	// 	}).addTo(map);
 
-		L.mapbox.featureLayer({
+	var myMapTwo = L.mapbox.featureLayer({
 		    // this feature is in the GeoJSON format: see geojson.org
 		    // for the full specification
 		    type: 'Feature',
@@ -105,12 +122,12 @@
 		        // coordinates here are in longitude, latitude order because
 		        // x, y is the standard for GeoJSON and many formats
 		        coordinates: [
-		          data.latlng[1], data.latlng[0] 
+		          <%= work.lng %>, <%= work.lat %>
 		        ]
 		    },
 		    properties: {
 		        title: '<%= work.name  %>',
-		        description: 'Work place of <%= home.name %>',
+		        description: 'Home location of <%= work.name %>',
 		        // one can customize markers by adding simplestyle properties
 		        // https://www.mapbox.com/guides/an-open-platform/#simplestyle
 		        'marker-size': 'large',
@@ -118,7 +135,7 @@
 		        'marker-symbol': 'suitcase'
 		    }
 		}).addTo(map2);
-	};
+////////////////////////////////////////////////////////////
 
 	</script>
 </body>
