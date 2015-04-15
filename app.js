@@ -98,6 +98,7 @@ app.post('/signup', function(req,res){
 			request(url,function(err, resp, bdy){
 				if(!err && resp.statusCode === 200){
 					var body = JSON.parse(bdy);
+					console.log(body);
 					var log = body.results[0].geometry.location.lng;
 					var lat = body.results[0].geometry.location.lat;
 					db.Address.create({type: "home", address: req.body.addressH
@@ -149,7 +150,15 @@ app.get('/profile', function(req,res){
 			db.Address.findAll({where: {UserId: dbUser.id}})
 			.then(function(addresses){
 				console.log(addresses);
-				res.render('users/profile',{user: dbUser, home: addresses[0], work: addresses[1]});
+				var i, j;
+				if(addresses[0].type==='home'){
+					i = 0;
+					j = 1;
+				}else{
+					i = 1;
+					j = 0;
+				}
+				res.render('users/profile',{user: dbUser, home: addresses[i], work: addresses[j]});
 			});
 		} else {
 			res.redirect('/login');
@@ -233,20 +242,56 @@ app.get('/map', function(req,res){
 	req.currentUser().then(function(user){
 		db.Address.findAll({where: {UserId: user.id}})
 		.then(function(addresses){
-			var latUH = addresses[0].lat+0.01;
-			var latLH = addresses[0].lat-0.01;
-			var latUH = addresses[0].lng+0.01;
-			var latUH = addresses[0].lng+0.01;
+			var latUH, latLH, lngUH, lngLH;
+			var latUW, latLW, lngUW, lngLW;
+			var isHome, isWork;
+			if(addresses[0].type==='home'){
+				isHome = 0;
+				isWork = 1;
+				latUH = addresses[0].lat+0.03;
+				latLH = addresses[0].lat-0.03;
+				lngUH = addresses[0].lng+0.03;
+				lngLH = addresses[0].lng-0.03;
 
-			var latPW = addresses[1].lat+0.01;
-			var latPW = addresses[1].lat+0.01;
-			var latPW = addresses[1].lat+0.01;
-			var latPW = addresses[1].lat+0.01;
+				latUW = addresses[1].lat+0.03;
+				latLW = addresses[1].lat-0.03;
+				lngUW = addresses[1].lng+0.03;
+				lngLW = addresses[1].lng-0.03;
+			}else{
+				isHome = 1;
+				isWork = 0;
+				latUH = addresses[1].lat+0.03;
+				latLH = addresses[1].lat-0.03;
+				lngUH = addresses[1].lng+0.03;
+				lngLH = addresses[1].lng-0.03;
 
-			sequelize.query("SELECT * FROM Addresses WHERE ").spread(function(results, metadata){
-
-			})
-			res.render('maps',{home: addresses[0], work: addresses[1], key: api_key});
+				latUW = addresses[0].lat+0.03;
+				latLW = addresses[0].lat-0.03;
+				lngUW = addresses[0].lng+0.03;
+				lngLW = addresses[0].lng-0.03;
+			}	
+			db.sequelize.query("select * from \"Addresses\" where lat < "+latUH+
+				" AND "+latLH+" < lat AND lng < "+lngUH+" AND "+lngLH+
+				" < lng AND type=\'home\' AND NOT \"UserId\"="+user.id+";")
+			.then(function(homeAddresses){
+				db.sequelize.query("select * from \"Addresses\" where lat < "+latUW+
+					" AND "+latLW+" < lat AND lng < "+lngUW+" AND "+lngLW+
+					" < lng AND type=\'home\' AND NOT \"UserId\"="+user.id+";")
+					.then(function(workAddresses){
+						var homeList =[];
+						var workList =[];
+						for(var i=0;i<homeAddresses[0].length;i++){
+							for(var j=0;j<workAddresses[0].length;j++){
+								if(homeAddresses[0][i].UserId===workAddresses[0][j].UserId){
+									homeList.push(homeAddresses[0][i]);
+									workList.push(workAddresses[0][i]);
+								}
+							}
+						}
+						console.log("I'm here");
+						res.render('maps',{home: addresses[isHome], work: addresses[isWork], key: api_key, homeL: homeList, workL: workList});
+					});				
+			});
 		});
 	});
 });

@@ -29,6 +29,9 @@
 			</div>
 			<div class="col-md-4 col-xs-4 col-sm-4 col-lg-4">
 				<h1>People in Your Neighborhood</h1>
+				<ul style="list-style: none;">
+					<li>key: <%= key %> <%= home.fullAdd  %></li>
+				</ul>
 			</div>
 		</div></br>
 		<div class="row maps" >
@@ -45,14 +48,10 @@
 	.setView([40, -74.50], 9);
 	var map2 = L.mapbox.map('map2', 'examples.map-i86nkdio')
 	.setView([40, -74.50], 9);
-	var geocoder = L.mapbox.geocoder('mapbox.places')
-	var myLayer = L.mapbox.featureLayer().addTo(map);
-	var myLayer2 = L.mapbox.featureLayer().addTo(map2);
+	var geocoder = L.mapbox.geocoder('mapbox.places');
 	
 	geocoder.query('<%= home.fullAdd  %>', showMap);
 	geocoder.query('<%= work.fullAdd  %>', showMapTwo);
-	// geocoder.query(homeAdd, showMap);
-	// geocoder.query(workAdd, showMapTwo);
 
 	function showMap(err, data) {
     // The geocoder can return an area, like a city, or a
