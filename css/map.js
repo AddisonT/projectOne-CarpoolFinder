@@ -1,49 +1,5 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<meta charset=utf-8 />
-	<title>A simple map</title>
-	<style>
-	body { margin:0; padding:0; }
-	#map { position:relative; top:0; bottom:0; width:100%; height:100%;}
-	</style>
-	<!-- Latest compiled and minified CSS -->
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
-	<link href="signin.css" rel="stylesheet">
-	<script src='map.js'></script>
-	<!-- Optional theme -->
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+window.onload = function() {
 
-	<!-- Latest compiled and minified JavaScript -->
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
-	<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
-	<script src='https://api.tiles.mapbox.com/mapbox.js/v2.1.7/mapbox.js'></script>
-	<link href='https://api.tiles.mapbox.com/mapbox.js/v2.1.7/mapbox.css' rel='stylesheet' />
-
-</head>
-<body>
-	<div class="container">
-		<div class="row maps" >
-			<div class="col-md-8 col-xs-8 col-sm-8 col-lg-8">
-				<h1>Home Location</h1>
-				<div id='map' style="height:400px;"></div>
-			</div>
-			<div class="col-md-4 col-xs-4 col-sm-4 col-lg-4">
-				<h1>People in Your Neighborhood</h1>
-				<ul style="list-style: none;">
-					<li><%= home.fullAdd  %></li>
-				</ul>
-			</div>
-		</div></br>
-		<div class="row maps" >
-			<div class="col-md-8 col-xs-8 col-sm-8 col-lg-8">
-				<h1>Work Location</h1>
-				<div id='map2' style="height:400px;"></div>
-			</div>
-			<div class="col-md-4 col-xs-4 col-sm-4 col-lg-4"></div>
-		</div>
-	</div>
-	<script>
 	L.mapbox.accessToken = '<%= key %>';
 	var map = L.mapbox.map('map', 'examples.map-i86nkdio')
 	.setView([<%= home.lat %>, <%= home.lng %>], 13);
@@ -114,8 +70,5 @@
 		        'marker-symbol': 'suitcase'
 		    }
 		}).addTo(map2);
-////////////////////////////////////////////////////////////
 
-	</script>
-</body>
-</html>
+};

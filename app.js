@@ -289,6 +289,10 @@ app.get('/map', function(req,res){
 	});
 });
 
+app.get('/mapdata', function(req,res){
+
+});
+
 app.delete('/logout', function(req,res){
     res.send("I'm a delete");
 });
