@@ -82,6 +82,8 @@ app.post('/signup', function(req,res){
 	db.User.createSecure(email,password).
 	then(function(user){
 
+		//api call to google geocoder to get coordinate data from home address
+		//then creates a new Address entry in the database
 		var fn1 = function(cb) {
 			var homeAdd = "" +  req.body.addressH + ", "
 				+  req.body.cityH + ", " +  req.body.stateH
@@ -104,7 +106,8 @@ app.post('/signup', function(req,res){
 				}
 			});
 		};
-
+		//api call to google geocoder to get coordinate data from work address
+		//then creates a new Address entry in the database
 		var fn2 = function(cb) {
 			var workAdd = "" +  req.body.addressW + ", "
 				+  req.body.cityW + ", " +  req.body.stateW
@@ -128,7 +131,7 @@ app.post('/signup', function(req,res){
 				}
 			});
 		};
-
+		//runs the two api calls for coordinates and address creation asynchronously
 		async.parallel([fn1,fn2], function(err,results){
 			res.redirect('/login');
 		});
@@ -190,6 +193,8 @@ app.post('/profile/edit', function(req, res){
 				isWork = 0;
 				isHome = 1;
 			}
+			//api call to google geocoder to get coordinate data from edited home address
+			//then updates the adress entry in the database
 			var fn1 = function(cb){
 				var homeAdd = "" +  req.body.addressH + ", "
 					+  req.body.cityH + ", " +  req.body.stateH
@@ -214,6 +219,8 @@ app.post('/profile/edit', function(req, res){
 				});
 			};
 
+			//api call to google geocoder to get coordinate data from edited work address
+			//then updates the adress entry in the database
 			var fn2 = function(cb){
 				var workAdd = "" +  req.body.addressW + ", "
 					+  req.body.cityW + ", " +  req.body.stateW
@@ -235,7 +242,7 @@ app.post('/profile/edit', function(req, res){
 					}
 				});
 			}
-
+			//runs the two api calls for coordinates and address update asynchronously
 			async.parallel([fn1,fn2], function(err,results){
 				res.redirect('/profile');
 			});
@@ -243,7 +250,8 @@ app.post('/profile/edit', function(req, res){
 	});
 });
 
-//renders the map with location information
+//renders the map for the current user's location and queries the Addresses for a list addresses 
+//that are within a square radius around the user's home and work location
 app.get('/map', function(req,res){
 	req.currentUser().then(function(user){
 		db.Address.findAll({where: {UserId: user.id}})
@@ -275,17 +283,21 @@ app.get('/map', function(req,res){
 				latLW = addresses[0].lat-0.01;
 				lngUW = addresses[0].lng+0.01;
 				lngLW = addresses[0].lng-0.01;
-			}	
+			}
+			//query Address table for home entries that are around the current user	
 			db.sequelize.query("select * from \"Addresses\" where lat < "+latUH+
 				" AND "+latLH+" < lat AND lng < "+lngUH+" AND "+lngLH+
 				" < lng AND type=\'home\' AND NOT \"UserId\"="+user.id+";")
 			.then(function(homeAddresses){
+				//query Address table for work entries that are around the current user
 				db.sequelize.query("select * from \"Addresses\" where lat < "+latUW+
 					" AND "+latLW+" < lat AND lng < "+lngUW+" AND "+lngLW+
 					" < lng AND type=\'work\' AND NOT \"UserId\"="+user.id+";")
 					.then(function(workAddresses){
 						var homeList =[];
 						var workList =[];
+						//stores the home and work addresses into an array if the home and work addresses found
+						//belong to the same person
 						for(var i=0;i<homeAddresses[0].length;i++){
 							for(var j=0;j<workAddresses[0].length;j++){
 								if(homeAddresses[0][i].UserId===workAddresses[0][j].UserId){
@@ -303,7 +315,7 @@ app.get('/map', function(req,res){
 	});
 });
 
-
+//route to pass the query data for map rendering to the map.js file
 app.get('/address.json', function(req,res){
 	req.currentUser().then(function(user){
 		db.Address.findAll({where: {UserId: user.id}})
@@ -346,14 +358,10 @@ app.get('/address.json', function(req,res){
 					" AND "+latLW+" < lat AND lng < "+lngUW+" AND "+lngLW+
 					" < lng AND type=\'work\' AND NOT \"UserId\"="+user.id+";")
 					.then(function(workAddresses){
-						// var homeList =[];
-						// var workList =[];
 						var dataHash = {data: [], hList: [], wList: []};
 						for(var i=0;i<homeAddresses[0].length;i++){
 							for(var j=0;j<workAddresses[0].length;j++){
 								if(homeAddresses[0][i].UserId===workAddresses[0][j].UserId){
-									// homeList.push(homeAddresses[0][i]);
-									// workList.push(workAddresses[0][i]);
 									dataHash.hList.push(homeAddresses[0][i]);
 									dataHash.wList.push(workAddresses[0][i]);
 								}
@@ -361,7 +369,6 @@ app.get('/address.json', function(req,res){
 						}
 						dataHash.data.push(addresses[isHome]);
 						dataHash.data.push(addresses[isWork]);
-						//dataHash.hList.push()
 						console.log(dataHash);
 						res.send(dataHash);
 					});				
@@ -370,6 +377,7 @@ app.get('/address.json', function(req,res){
 	});
 });
 
+//route to render the contact page of selected user to inquire about carpooling
 app.get('/find/:id',function(req,res){
 	var personId = req.params.id;
 	req.currentUser().then(function(user){

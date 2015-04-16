@@ -3,6 +3,11 @@ body {
   padding-bottom: 40px;
   background-color: #eee;
 }
+/*.homePage{
+  background-image: url('http://upload.wikimedia.org/wikipedia/commons/3/32/Carpool_sign.svg');
+  background-repeat: no-repeat;
+  background-size: auto;
+}*/
 
 h2{
   text-align: center;
@@ -41,6 +46,4 @@ h2{
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
-.maps {
-  margin: ;
-}
+
