@@ -67,7 +67,7 @@ module.exports = function (sequelize, DataTypes){
 		                console.log("WERE GETTING HERE\n\n\n\n\n");
 		                return _this.create({
 		                  email: email,
-		                  password: _this.encryptPassword(password)});
+		                  password: _this.encryptPassword(passwordD)});
 		              }
 		            });
 		        }

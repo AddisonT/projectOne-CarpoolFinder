@@ -83,7 +83,7 @@ $(function() {
 	        properties: {
 	            'marker-color': '#00F',
 	            'marker-symbol': 'star-stroked',
-	            title: ''+d.wList[j].name,
+	            title: ''+d.hList[j].name +' works at '+d.wList[j].name,
 	            description: ''+d.wList[j].fullAdd
 	        }
 	    });
