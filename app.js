@@ -14,7 +14,7 @@ var request = require('request');
 
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
-
+app.use(express.static(__dirname+'/css'));
 // Refactor connection and query code
 var db = require("./models");
 
@@ -172,10 +172,16 @@ app.get('/profile/edit', function(req,res){
 app.post('/profile/edit', function(req, res){
 	req.currentUser().then(function(user){
 		var userId = user.id;
-
+		var isHome, isWork;
 		db.Address.findAll({where: {UserId: user.id}})
 		.then(function(addresses){
-
+			if(addresses[0].type==='home'){
+				isHome = 0;
+				isWork = 1;
+			}else{
+				isWork = 0;
+				isHome = 1;
+			}
 			var fn1 = function(cb){
 				var homeAdd = "" +  req.body.addressH + ", "
 					+  req.body.cityH + ", " +  req.body.stateH
@@ -189,7 +195,7 @@ app.post('/profile/edit', function(req, res){
 						var log = body.results[0].geometry.location.lng;
 						var lat = body.results[0].geometry.location.lat;
 
-						addresses[0].updateAttributes({
+						addresses[isHome].updateAttributes({
 							type: "home", address: req.body.addressH
 							, name: req.body.nameH, UserId: userId, city: req.body.cityH
 							, state: req.body.stateH, zip: req.body.zipH, fullAdd: homeAdd, lat: lat, lng: log})
@@ -211,7 +217,7 @@ app.post('/profile/edit', function(req, res){
 						var body = JSON.parse(bdy);
 						var log = body.results[0].geometry.location.lng;
 						var lat = body.results[0].geometry.location.lat;
-						addresses[1].updateAttributes({
+						addresses[isWork].updateAttributes({
 							type: "work", address: req.body.addressW
 							, name: req.body.nameW, UserId: userId, city: req.body.cityW
 							, state: req.body.stateW, zip: req.body.zipW, fullAdd: workAdd, lat: lat, lng: log})
@@ -240,27 +246,27 @@ app.get('/map', function(req,res){
 			if(addresses[0].type==='home'){
 				isHome = 0;
 				isWork = 1;
-				latUH = addresses[0].lat+0.03;
-				latLH = addresses[0].lat-0.03;
-				lngUH = addresses[0].lng+0.03;
-				lngLH = addresses[0].lng-0.03;
+				latUH = addresses[0].lat+0.01;
+				latLH = addresses[0].lat-0.01;
+				lngUH = addresses[0].lng+0.01;
+				lngLH = addresses[0].lng-0.01;
 
-				latUW = addresses[1].lat+0.03;
-				latLW = addresses[1].lat-0.03;
-				lngUW = addresses[1].lng+0.03;
-				lngLW = addresses[1].lng-0.03;
+				latUW = addresses[1].lat+0.01;
+				latLW = addresses[1].lat-0.01;
+				lngUW = addresses[1].lng+0.01;
+				lngLW = addresses[1].lng-0.01;
 			}else{
 				isHome = 1;
 				isWork = 0;
-				latUH = addresses[1].lat+0.03;
-				latLH = addresses[1].lat-0.03;
-				lngUH = addresses[1].lng+0.03;
-				lngLH = addresses[1].lng-0.03;
+				latUH = addresses[1].lat+0.01;
+				latLH = addresses[1].lat-0.01;
+				lngUH = addresses[1].lng+0.01;
+				lngLH = addresses[1].lng-0.01;
 
-				latUW = addresses[0].lat+0.03;
-				latLW = addresses[0].lat-0.03;
-				lngUW = addresses[0].lng+0.03;
-				lngLW = addresses[0].lng-0.03;
+				latUW = addresses[0].lat+0.01;
+				latLW = addresses[0].lat-0.01;
+				lngUW = addresses[0].lng+0.01;
+				lngLW = addresses[0].lng-0.01;
 			}	
 			db.sequelize.query("select * from \"Addresses\" where lat < "+latUH+
 				" AND "+latLH+" < lat AND lng < "+lngUH+" AND "+lngLH+
@@ -268,7 +274,7 @@ app.get('/map', function(req,res){
 			.then(function(homeAddresses){
 				db.sequelize.query("select * from \"Addresses\" where lat < "+latUW+
 					" AND "+latLW+" < lat AND lng < "+lngUW+" AND "+lngLW+
-					" < lng AND type=\'home\' AND NOT \"UserId\"="+user.id+";")
+					" < lng AND type=\'work\' AND NOT \"UserId\"="+user.id+";")
 					.then(function(workAddresses){
 						var homeList =[];
 						var workList =[];
@@ -280,17 +286,92 @@ app.get('/map', function(req,res){
 								}
 							}
 						}
-						console.log("I'm here");
+						console.log(homeList);
 						res.render('maps',{home: addresses[isHome], work: addresses[isWork]
-							, key: api_key, homeL: homeList, workL: workList});
+							, homeL: homeList, workL: workList});
 					});				
 			});
 		});
 	});
 });
 
-app.get('/mapdata', function(req,res){
 
+app.get('/address.json', function(req,res){
+	req.currentUser().then(function(user){
+		db.Address.findAll({where: {UserId: user.id}})
+		  .then(function(addresses){
+
+		  	var latUH, latLH, lngUH, lngLH;
+			var latUW, latLW, lngUW, lngLW;
+			var isHome, isWork;
+			if(addresses[0].type==='home'){
+				isHome = 0;
+				isWork = 1;
+				latUH = addresses[0].lat+0.01;
+				latLH = addresses[0].lat-0.01;
+				lngUH = addresses[0].lng+0.01;
+				lngLH = addresses[0].lng-0.01;
+
+				latUW = addresses[1].lat+0.01;
+				latLW = addresses[1].lat-0.01;
+				lngUW = addresses[1].lng+0.01;
+				lngLW = addresses[1].lng-0.01;
+			}else{
+				isHome = 1;
+				isWork = 0;
+				latUH = addresses[1].lat+0.01;
+				latLH = addresses[1].lat-0.01;
+				lngUH = addresses[1].lng+0.01;
+				lngLH = addresses[1].lng-0.01;
+
+				latUW = addresses[0].lat+0.01;
+				latLW = addresses[0].lat-0.01;
+				lngUW = addresses[0].lng+0.01;
+				lngLW = addresses[0].lng-0.01;
+			}	
+			console.log(latUW+"  "+latLW+"   "+lngUW+"  "+lngLW);
+			db.sequelize.query("select * from \"Addresses\" where lat < "+latUH+
+				" AND "+latLH+" < lat AND lng < "+lngUH+" AND "+lngLH+
+				" < lng AND type=\'home\' AND NOT \"UserId\"="+user.id+";")
+			.then(function(homeAddresses){
+				db.sequelize.query("select * from \"Addresses\" where lat < "+latUW+
+					" AND "+latLW+" < lat AND lng < "+lngUW+" AND "+lngLW+
+					" < lng AND type=\'work\' AND NOT \"UserId\"="+user.id+";")
+					.then(function(workAddresses){
+						// var homeList =[];
+						// var workList =[];
+						var dataHash = {data: [], hList: [], wList: []};
+						for(var i=0;i<homeAddresses[0].length;i++){
+							for(var j=0;j<workAddresses[0].length;j++){
+								if(homeAddresses[0][i].UserId===workAddresses[0][j].UserId){
+									// homeList.push(homeAddresses[0][i]);
+									// workList.push(workAddresses[0][i]);
+									dataHash.hList.push(homeAddresses[0][i]);
+									dataHash.wList.push(workAddresses[0][i]);
+								}
+							}
+						}
+						dataHash.data.push(addresses[isHome]);
+						dataHash.data.push(addresses[isWork]);
+						//dataHash.hList.push()
+						console.log(dataHash);
+						res.send(dataHash);
+					});				
+			});
+		  });
+	});
+});
+
+app.get('/find/:id',function(req,res){
+	var personId = req.params.id;
+	req.currentUser().then(function(user){
+		db.Address.find({where: {id: personId}})
+		.then(function(add){
+			db.User.find(add.UserId).then(function(foundU){
+				res.render('users/meet', {person: foundU, add: add});
+			});
+		});
+	});
 });
 
 app.delete('/logout', function(req,res){

@@ -10,7 +10,7 @@
 <!-- Latest compiled and minified JavaScript -->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 	<meta charset="UTF-8">
-	<title>Carpool</title>
+	<title>Chat</title>
 </head>
 <body>
 	<div class="container">
@@ -18,14 +18,16 @@
 			<div class="col-md-4 col-xs-4 col-sm-4 col-lg-4"></div>	
 			<div class="col-md-4 col-xs-4 col-sm-4 col-lg-4">
 				<ul style="list-style: none;">
-					<h1>Welcome to Carpool Finder</h1>
-					<li>
-						<a href="/login"><button class="btn btn-lg btn-primary btn-block">Login</button></a>
-					</li></br>
-					<li>
-						<a href="/signup"><button class="btn btn-lg btn-primary btn-block">Sign Up</button></a>
-					</li>
+					<h2><%= add.name %> Contact Info</h2>
+					<li>Email: <%= person.email %></li>
 				</ul>
+			</div>	
+			<div class="col-md-4 col-xs-4 col-sm-4 col-lg-4"></div>	
+		</div></br></br></br>
+		<div class="row">
+			<div class="col-md-4 col-xs-4 col-sm-4 col-lg-4"></div>	
+			<div class="col-md-4 col-xs-4 col-sm-4 col-lg-4">
+				<a href="/map"><button class="btn btn-lg btn-primary btn-block">Back to Map</button></a>
 			</div>	
 			<div class="col-md-4 col-xs-4 col-sm-4 col-lg-4"></div>	
 		</div>
