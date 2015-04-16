@@ -163,7 +163,15 @@ app.get('/profile/edit', function(req,res){
 	req.currentUser().then(function(user){
 		db.Address.findAll({where: {UserId: user.id}})
 		.then(function(addresses){
-			res.render('users/edit',{user: user, home: addresses[0], work: addresses[1]});
+			var i, j;
+			if(addresses[0].type==='home'){
+				i = 0;
+				j = 1;
+			}else{
+				i = 1;
+				j = 0;
+			}
+			res.render('users/edit',{user: user, home: addresses[i], work: addresses[j]});
 		});
 	});
 });
