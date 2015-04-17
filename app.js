@@ -259,6 +259,8 @@ app.get('/map', function(req,res){
 			var latUH, latLH, lngUH, lngLH;
 			var latUW, latLW, lngUW, lngLW;
 			var isHome, isWork;
+
+			//bounds for finding users within a square radius of the current user's locations
 			if(addresses[0].type==='home'){
 				isHome = 0;
 				isWork = 1;
@@ -324,6 +326,8 @@ app.get('/address.json', function(req,res){
 		  	var latUH, latLH, lngUH, lngLH;
 			var latUW, latLW, lngUW, lngLW;
 			var isHome, isWork;
+
+			//bounds for finding users within a square radius of the current user's locations
 			if(addresses[0].type==='home'){
 				isHome = 0;
 				isWork = 1;
@@ -349,7 +353,6 @@ app.get('/address.json', function(req,res){
 				lngUW = addresses[0].lng+0.01;
 				lngLW = addresses[0].lng-0.01;
 			}	
-			console.log(latUW+"  "+latLW+"   "+lngUW+"  "+lngLW);
 			db.sequelize.query("select * from \"Addresses\" where lat < "+latUH+
 				" AND "+latLH+" < lat AND lng < "+lngUH+" AND "+lngLH+
 				" < lng AND type=\'home\' AND NOT \"UserId\"="+user.id+";")
@@ -358,6 +361,8 @@ app.get('/address.json', function(req,res){
 					" AND "+latLW+" < lat AND lng < "+lngUW+" AND "+lngLW+
 					" < lng AND type=\'work\' AND NOT \"UserId\"="+user.id+";")
 					.then(function(workAddresses){
+						//create an object to store all the data that I need to pass to the map.js file
+						//to render the maps with Address markers
 						var dataHash = {data: [], hList: [], wList: []};
 						for(var i=0;i<homeAddresses[0].length;i++){
 							for(var j=0;j<workAddresses[0].length;j++){
@@ -390,8 +395,10 @@ app.get('/find/:id',function(req,res){
 	});
 });
 
-app.delete('/logout', function(req,res){
-    res.send("I'm a delete");
+//logs out the current user
+app.get('/logout', function(req,res){
+	req.logout();
+    res.redirect('/login');
 });
 
 app.listen(process.env.PORT || 3000, function(){

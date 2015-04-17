@@ -1,5 +1,6 @@
 $(function() {
 
+	//jQuery request to get the Address data to render markers on the maps for the home and work Addresses
 	$.get('/address.json', function(d) {
 		//put code in here
 		console.log(d);
@@ -26,8 +27,6 @@ $(function() {
 	    },
 	    properties: {
 	        title: ''+d.data[0].name,
-	        // one can customize markers by adding simplestyle properties
-	        // https://www.mapbox.com/guides/an-open-platform/#simplestyle
 	        'marker-size': 'large',
 	        'marker-color': '#000',
 	        'marker-symbol': 'building'
@@ -49,8 +48,6 @@ $(function() {
 	    },
 	    properties: {
 	        title: ''+d.data[1].name,
-	        // one can customize markers by adding simplestyle properties
-	        // https://www.mapbox.com/guides/an-open-platform/#simplestyle
 	        'marker-size': 'large',
 	        'marker-color': '#000',
 	        'marker-symbol': 'suitcase'
