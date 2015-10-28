@@ -5,9 +5,9 @@ $(function() {
 		//put code in here
 		console.log(d);
 	L.mapbox.accessToken = 'pk.eyJ1IjoiYWRkaXNvbnRhbSIsImEiOiJxeG5aX0xVIn0.JnYhW92yIgJvBZzvxQYPWw';
-	var map = L.mapbox.map('map', 'examples.map-i86nkdio')
+	var map = L.mapbox.map('map', 'addisontam.m4ienfig')
 	.setView([d.data[0].lat, d.data[0].lng], 14);
-	var map2 = L.mapbox.map('map2', 'examples.map-i86nkdio')
+	var map2 = L.mapbox.map('map2', 'addisontam.m4ienfig')
 	.setView([d.data[1].lat, d.data[1].lng], 14);
 	var featuresH = [];
 	var featuresW = [];
